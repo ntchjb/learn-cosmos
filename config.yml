@@ -1,8 +1,8 @@
 accounts:
   - name: alice
-    coins: ["1000token", "100000000stake"]
+    coins: ["1000000000uusd"]
   - name: bob
-    coins: ["500token"]
+    coins: ["1000000uusd"]
 validator:
   name: alice
-  staked: "100000000stake"
+  staked: "1000stake"
