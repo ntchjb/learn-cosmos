@@ -8,5 +8,6 @@ option go_package = "github.com/ntchjb/learn-cosmos/x/learncosmos/types";
 // GenesisState defines the capability module's genesis state.
 message GenesisState {
     // this line is used by starport scaffolding # genesis/proto/state
+    uint64 gold_amount = 1;
+    uint64 gold_unit_price_uusd = 2;
 }
-

@@ -10,6 +10,15 @@ option go_package = "github.com/ntchjb/learn-cosmos/x/learncosmos/types";
 // Query defines the gRPC querier service.
 service Query {
     // this line is used by starport scaffolding # 2
+    rpc GoldPool(QueryGoldPoolRequest) returns (QueryGoldPoolResponse) {
+        option (google.api.http).get = "/query/gold-pool";
+    }
 }
 
+message QueryGoldPoolRequest {}
+
 // this line is used by starport scaffolding # 3
+message QueryGoldPoolResponse {
+    uint64 gold_amount = 1;
+    uint64 gold_price_per_unit = 2;
+}

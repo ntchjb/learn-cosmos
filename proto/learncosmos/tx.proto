@@ -1,0 +1,9 @@
+syntax = "proto3";
+package ntchjb.learncosmos.learncosmos;
+
+option go_package = "github.com/ntchjb/learn-cosmos/x/learncosmos/types";
+
+message MsgBuyGold {
+  string buyer = 1;
+  uint64 amount = 2;
+}

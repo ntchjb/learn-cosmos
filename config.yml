@@ -1,8 +1,17 @@
 accounts:
   - name: alice
-    coins: ["1000000000uusd"]
+    coins: ["1000000000uusd", "1000000stake"]
   - name: bob
     coins: ["1000000uusd"]
 validator:
   name: alice
-  staked: "1000stake"
+  staked: "1000000stake"
+genesis:
+  chain_id: "goldentrade"
+  app_state:
+    learncosmos:
+      gold_amount: "1000000"
+      gold_unit_price_uusd: "1000"
+servers:
+  api-address: "localhost:1317"
+  rpc-address: "localhost:26657"

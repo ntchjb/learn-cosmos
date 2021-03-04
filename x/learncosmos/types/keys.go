@@ -15,6 +15,9 @@ const (
 
 	// MemStoreKey defines the in-memory store key
 	MemStoreKey = "mem_capability"
+
+	// GoldPoolKey defines gold pool store key
+	GoldPoolKey = "Gold-pool-"
 )
 
 func KeyPrefix(p string) []byte {
