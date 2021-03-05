@@ -18,6 +18,8 @@ const (
 
 	// GoldPoolKey defines gold pool store key
 	GoldPoolKey = "Gold-pool-"
+
+	OwnedGoldKey = "Gold-owned-"
 )
 
 func KeyPrefix(p string) []byte {

@@ -2,7 +2,6 @@ syntax = "proto3";
 package ntchjb.learncosmos.learncosmos;
 
 import "google/api/annotations.proto";
-import "cosmos/base/query/v1beta1/pagination.proto";
 // this line is used by starport scaffolding # 1
 
 option go_package = "github.com/ntchjb/learn-cosmos/x/learncosmos/types";
@@ -13,6 +12,10 @@ service Query {
     rpc GoldPool(QueryGoldPoolRequest) returns (QueryGoldPoolResponse) {
         option (google.api.http).get = "/query/gold-pool";
     }
+
+    rpc OwnedGold(QueryOwnedGoldRequest) returns (QueryOwnedGoldResponse) {
+        option (google.api.http).get = "/query/owned-gold/{owner}";
+    }
 }
 
 message QueryGoldPoolRequest {}
@@ -21,4 +24,12 @@ message QueryGoldPoolRequest {}
 message QueryGoldPoolResponse {
     uint64 gold_amount = 1;
     uint64 gold_price_per_unit = 2;
+}
+
+message QueryOwnedGoldRequest {
+    string owner = 1;
+}
+
+message QueryOwnedGoldResponse {
+    uint64 amount = 1;
 }

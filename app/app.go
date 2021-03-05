@@ -144,6 +144,7 @@ var (
 		stakingtypes.NotBondedPoolName: {authtypes.Burner, authtypes.Staking},
 		govtypes.ModuleName:            {authtypes.Burner},
 		ibctransfertypes.ModuleName:    {authtypes.Minter, authtypes.Burner},
+		learncosmostypes.ModuleName:    nil,
 	}
 
 	// module accounts that are allowed to receive tokens
@@ -330,7 +331,7 @@ func New(
 	app.EvidenceKeeper = *evidenceKeeper
 
 	app.learncosmosKeeper = *learncosmoskeeper.NewKeeper(
-		appCodec, keys[learncosmostypes.StoreKey], keys[learncosmostypes.MemStoreKey],
+		appCodec, keys[learncosmostypes.StoreKey], keys[learncosmostypes.MemStoreKey], app.BankKeeper,
 	)
 
 	// this line is used by starport scaffolding # stargate/app/keeperDefinition

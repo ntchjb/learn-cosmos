@@ -10,7 +10,10 @@ import (
 // state.
 func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) {
 	// this line is used by starport scaffolding # genesis/module/init
-	k.SetGoldPool(ctx, genState)
+	k.SetGoldPool(ctx, types.GoldPool{
+		Amount:       genState.GoldAmount,
+		PricePerUnit: genState.GoldUnitPriceUusd,
+	})
 }
 
 // ExportGenesis returns the capability module's exported genesis.
