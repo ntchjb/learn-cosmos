@@ -8,6 +8,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/store/prefix"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ntchjb/learn-cosmos/x/learncosmos/types"
 )
 
@@ -83,15 +84,13 @@ func (k Keeper) BuyGoldFromPool(ctx sdk.Context, msg types.MsgBuyGold) error {
 	goldPool := k.GetGoldPool(ctx)
 	ownedGold := k.GetOwnedGold(ctx, msg.Buyer)
 
-	fmt.Println("goldPool is", goldPool, "and owned gold is", ownedGold)
-
 	if msg.Amount > goldPool.Amount {
-		return fmt.Errorf("gold amount in pool is not sufficient")
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidRequest, "gold amount in pool is not sufficient")
 	}
 
 	buyerAddr, err := sdk.AccAddressFromBech32(msg.Buyer)
 	if err != nil {
-		return fmt.Errorf("buyer address is invalid")
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "buyer address is invalid")
 	}
 
 	currentBalance := k.bankKeeper.GetBalance(ctx, buyerAddr, "uusd")
@@ -99,7 +98,7 @@ func (k Keeper) BuyGoldFromPool(ctx sdk.Context, msg types.MsgBuyGold) error {
 
 	payAmount := msg.Amount * goldPool.PricePerUnit
 	if currentBalance.Amount.Uint64() < payAmount {
-		return fmt.Errorf("current buyer balance is not sufficient")
+		return sdkerrors.Wrapf(sdkerrors.ErrInsufficientFunds, "current buyer balance is not sufficient")
 	}
 
 	goldPool.Amount -= msg.Amount
@@ -107,8 +106,6 @@ func (k Keeper) BuyGoldFromPool(ctx sdk.Context, msg types.MsgBuyGold) error {
 
 	ownedGold.Amount += msg.Amount
 	k.SetOwnedGold(ctx, ownedGold)
-
-	fmt.Println("new goldPool is", goldPool, "and new owned gold is", ownedGold)
 
 	if err := k.bankKeeper.SendCoinsFromAccountToModule(
 		ctx,
@@ -129,7 +126,7 @@ func (k Keeper) SellGoldToPool(ctx sdk.Context, msg types.MsgSellGold) error {
 	sellerAddr, _ := sdk.AccAddressFromBech32(msg.Seller)
 
 	if msg.Amount > ownedGold.Amount {
-		return fmt.Errorf("gold amount owned by sender is not sufficient")
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidRequest, "gold amount owned by sender is not sufficient")
 	}
 
 	goldPool.Amount += msg.Amount
@@ -154,7 +151,7 @@ func (k Keeper) TransferGold(ctx sdk.Context, msg types.MsgTransferGold) error {
 	receiverOwnedGold := k.GetOwnedGold(ctx, msg.Receiver)
 
 	if senderOwnedGold.Amount < msg.Amount {
-		return fmt.Errorf("gold amount owned by sender is not sufficient")
+		return sdkerrors.Wrapf(sdkerrors.ErrInvalidRequest, "gold amount owned by sender is not sufficient")
 	}
 
 	senderOwnedGold.Amount -= msg.Amount
