@@ -4,8 +4,13 @@
 package types
 
 import (
+	context "context"
 	fmt "fmt"
+	grpc1 "github.com/gogo/protobuf/grpc"
 	proto "github.com/gogo/protobuf/proto"
+	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	io "io"
 	math "math"
 	math_bits "math/bits"
@@ -22,110 +27,6 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
-type GoldPool struct {
-	Amount       uint64 `protobuf:"varint,1,opt,name=amount,proto3" json:"amount,omitempty"`
-	PricePerUnit uint64 `protobuf:"varint,3,opt,name=price_per_unit,json=pricePerUnit,proto3" json:"price_per_unit,omitempty"`
-}
-
-func (m *GoldPool) Reset()         { *m = GoldPool{} }
-func (m *GoldPool) String() string { return proto.CompactTextString(m) }
-func (*GoldPool) ProtoMessage()    {}
-func (*GoldPool) Descriptor() ([]byte, []int) {
-	return fileDescriptor_9d05de96db97a9dd, []int{0}
-}
-func (m *GoldPool) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *GoldPool) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_GoldPool.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *GoldPool) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GoldPool.Merge(m, src)
-}
-func (m *GoldPool) XXX_Size() int {
-	return m.Size()
-}
-func (m *GoldPool) XXX_DiscardUnknown() {
-	xxx_messageInfo_GoldPool.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_GoldPool proto.InternalMessageInfo
-
-func (m *GoldPool) GetAmount() uint64 {
-	if m != nil {
-		return m.Amount
-	}
-	return 0
-}
-
-func (m *GoldPool) GetPricePerUnit() uint64 {
-	if m != nil {
-		return m.PricePerUnit
-	}
-	return 0
-}
-
-type OwnedGold struct {
-	Owner  string `protobuf:"bytes,1,opt,name=owner,proto3" json:"owner,omitempty"`
-	Amount uint64 `protobuf:"varint,2,opt,name=amount,proto3" json:"amount,omitempty"`
-}
-
-func (m *OwnedGold) Reset()         { *m = OwnedGold{} }
-func (m *OwnedGold) String() string { return proto.CompactTextString(m) }
-func (*OwnedGold) ProtoMessage()    {}
-func (*OwnedGold) Descriptor() ([]byte, []int) {
-	return fileDescriptor_9d05de96db97a9dd, []int{1}
-}
-func (m *OwnedGold) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *OwnedGold) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_OwnedGold.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *OwnedGold) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_OwnedGold.Merge(m, src)
-}
-func (m *OwnedGold) XXX_Size() int {
-	return m.Size()
-}
-func (m *OwnedGold) XXX_DiscardUnknown() {
-	xxx_messageInfo_OwnedGold.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_OwnedGold proto.InternalMessageInfo
-
-func (m *OwnedGold) GetOwner() string {
-	if m != nil {
-		return m.Owner
-	}
-	return ""
-}
-
-func (m *OwnedGold) GetAmount() uint64 {
-	if m != nil {
-		return m.Amount
-	}
-	return 0
-}
-
 type MsgBuyGold struct {
 	Buyer  string `protobuf:"bytes,1,opt,name=buyer,proto3" json:"buyer,omitempty"`
 	Amount uint64 `protobuf:"varint,2,opt,name=amount,proto3" json:"amount,omitempty"`
@@ -135,7 +36,7 @@ func (m *MsgBuyGold) Reset()         { *m = MsgBuyGold{} }
 func (m *MsgBuyGold) String() string { return proto.CompactTextString(m) }
 func (*MsgBuyGold) ProtoMessage()    {}
 func (*MsgBuyGold) Descriptor() ([]byte, []int) {
-	return fileDescriptor_9d05de96db97a9dd, []int{2}
+	return fileDescriptor_9d05de96db97a9dd, []int{0}
 }
 func (m *MsgBuyGold) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -178,6 +79,42 @@ func (m *MsgBuyGold) GetAmount() uint64 {
 	return 0
 }
 
+type MsgBuyGoldResponse struct {
+}
+
+func (m *MsgBuyGoldResponse) Reset()         { *m = MsgBuyGoldResponse{} }
+func (m *MsgBuyGoldResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgBuyGoldResponse) ProtoMessage()    {}
+func (*MsgBuyGoldResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9d05de96db97a9dd, []int{1}
+}
+func (m *MsgBuyGoldResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgBuyGoldResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgBuyGoldResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgBuyGoldResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgBuyGoldResponse.Merge(m, src)
+}
+func (m *MsgBuyGoldResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgBuyGoldResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgBuyGoldResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgBuyGoldResponse proto.InternalMessageInfo
+
 type MsgSellGold struct {
 	Seller string `protobuf:"bytes,1,opt,name=seller,proto3" json:"seller,omitempty"`
 	Amount uint64 `protobuf:"varint,2,opt,name=amount,proto3" json:"amount,omitempty"`
@@ -187,7 +124,7 @@ func (m *MsgSellGold) Reset()         { *m = MsgSellGold{} }
 func (m *MsgSellGold) String() string { return proto.CompactTextString(m) }
 func (*MsgSellGold) ProtoMessage()    {}
 func (*MsgSellGold) Descriptor() ([]byte, []int) {
-	return fileDescriptor_9d05de96db97a9dd, []int{3}
+	return fileDescriptor_9d05de96db97a9dd, []int{2}
 }
 func (m *MsgSellGold) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -229,6 +166,42 @@ func (m *MsgSellGold) GetAmount() uint64 {
 	}
 	return 0
 }
+
+type MsgSellGoldResponse struct {
+}
+
+func (m *MsgSellGoldResponse) Reset()         { *m = MsgSellGoldResponse{} }
+func (m *MsgSellGoldResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgSellGoldResponse) ProtoMessage()    {}
+func (*MsgSellGoldResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9d05de96db97a9dd, []int{3}
+}
+func (m *MsgSellGoldResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgSellGoldResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgSellGoldResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgSellGoldResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgSellGoldResponse.Merge(m, src)
+}
+func (m *MsgSellGoldResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgSellGoldResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgSellGoldResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgSellGoldResponse proto.InternalMessageInfo
 
 type MsgTransferGold struct {
 	Sender   string `protobuf:"bytes,1,opt,name=sender,proto3" json:"sender,omitempty"`
@@ -290,105 +263,229 @@ func (m *MsgTransferGold) GetAmount() uint64 {
 	return 0
 }
 
+type MsgTransferGoldResponse struct {
+}
+
+func (m *MsgTransferGoldResponse) Reset()         { *m = MsgTransferGoldResponse{} }
+func (m *MsgTransferGoldResponse) String() string { return proto.CompactTextString(m) }
+func (*MsgTransferGoldResponse) ProtoMessage()    {}
+func (*MsgTransferGoldResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_9d05de96db97a9dd, []int{5}
+}
+func (m *MsgTransferGoldResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MsgTransferGoldResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MsgTransferGoldResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MsgTransferGoldResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MsgTransferGoldResponse.Merge(m, src)
+}
+func (m *MsgTransferGoldResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *MsgTransferGoldResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MsgTransferGoldResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MsgTransferGoldResponse proto.InternalMessageInfo
+
 func init() {
-	proto.RegisterType((*GoldPool)(nil), "ntchjb.learncosmos.learncosmos.GoldPool")
-	proto.RegisterType((*OwnedGold)(nil), "ntchjb.learncosmos.learncosmos.OwnedGold")
 	proto.RegisterType((*MsgBuyGold)(nil), "ntchjb.learncosmos.learncosmos.MsgBuyGold")
+	proto.RegisterType((*MsgBuyGoldResponse)(nil), "ntchjb.learncosmos.learncosmos.MsgBuyGoldResponse")
 	proto.RegisterType((*MsgSellGold)(nil), "ntchjb.learncosmos.learncosmos.MsgSellGold")
+	proto.RegisterType((*MsgSellGoldResponse)(nil), "ntchjb.learncosmos.learncosmos.MsgSellGoldResponse")
 	proto.RegisterType((*MsgTransferGold)(nil), "ntchjb.learncosmos.learncosmos.MsgTransferGold")
+	proto.RegisterType((*MsgTransferGoldResponse)(nil), "ntchjb.learncosmos.learncosmos.MsgTransferGoldResponse")
 }
 
 func init() { proto.RegisterFile("learncosmos/tx.proto", fileDescriptor_9d05de96db97a9dd) }
 
 var fileDescriptor_9d05de96db97a9dd = []byte{
-	// 304 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x91, 0x3f, 0x4b, 0xc3, 0x40,
-	0x18, 0x87, 0x1b, 0xab, 0xa5, 0x7d, 0x15, 0x85, 0x50, 0x4a, 0x71, 0x38, 0xa4, 0x38, 0xb8, 0xd8,
-	0x80, 0x4e, 0x0a, 0x2e, 0x5d, 0x74, 0x30, 0x58, 0xa2, 0x2e, 0x82, 0x94, 0xfc, 0x79, 0x4d, 0x23,
-	0x97, 0xbb, 0x70, 0x77, 0xb1, 0xcd, 0xb7, 0xf0, 0x63, 0x39, 0x76, 0x74, 0x94, 0xe4, 0x8b, 0x48,
-	0xaf, 0xb1, 0x3d, 0x87, 0x6e, 0x79, 0x72, 0x3c, 0xcf, 0x3b, 0xfc, 0xa0, 0x4b, 0xd1, 0x17, 0x2c,
-	0xe4, 0x32, 0xe5, 0xd2, 0x51, 0xf3, 0x61, 0x26, 0xb8, 0xe2, 0x36, 0x61, 0x2a, 0x9c, 0xbe, 0x07,
-	0x43, 0xe3, 0xd1, 0xfc, 0x1e, 0xdc, 0x41, 0xfb, 0x96, 0xd3, 0x68, 0xcc, 0x39, 0xb5, 0x7b, 0xd0,
-	0xf2, 0x53, 0x9e, 0x33, 0xd5, 0xb7, 0x4e, 0xac, 0xb3, 0x5d, 0xaf, 0x26, 0xfb, 0x14, 0x0e, 0x33,
-	0x91, 0x84, 0x38, 0xc9, 0x50, 0x4c, 0x72, 0x96, 0xa8, 0x7e, 0x53, 0xbf, 0x1f, 0xe8, 0xbf, 0x63,
-	0x14, 0xcf, 0x2c, 0x51, 0x83, 0x2b, 0xe8, 0x3c, 0xcc, 0x18, 0x46, 0xcb, 0x9c, 0xdd, 0x85, 0x3d,
-	0x3e, 0x63, 0x28, 0x74, 0xa9, 0xe3, 0xad, 0xc0, 0x38, 0xb0, 0x63, 0x1e, 0x18, 0x5c, 0x03, 0xb8,
-	0x32, 0x1e, 0xe5, 0xc5, 0x9f, 0x1b, 0xe4, 0xc5, 0xc6, 0xd5, 0xb0, 0xd5, 0xbd, 0x81, 0x7d, 0x57,
-	0xc6, 0x8f, 0x48, 0xa9, 0x96, 0x7b, 0xd0, 0x92, 0x48, 0xe9, 0xda, 0xae, 0x69, 0xab, 0xfe, 0x0a,
-	0x47, 0xae, 0x8c, 0x9f, 0x84, 0xcf, 0xe4, 0x1b, 0x8a, 0x4d, 0x82, 0x45, 0x66, 0x62, 0x49, 0xf6,
-	0x31, 0xb4, 0x05, 0x86, 0x98, 0x7c, 0xa0, 0xd0, 0x91, 0x8e, 0xb7, 0x66, 0x23, 0xdf, 0x34, 0xf3,
-	0xa3, 0xfb, 0xaf, 0x92, 0x58, 0x8b, 0x92, 0x58, 0x3f, 0x25, 0xb1, 0x3e, 0x2b, 0xd2, 0x58, 0x54,
-	0xa4, 0xf1, 0x5d, 0x91, 0xc6, 0xcb, 0x45, 0x9c, 0xa8, 0x69, 0x1e, 0x0c, 0x43, 0x9e, 0x3a, 0xab,
-	0x8d, 0x1c, 0xbd, 0xcb, 0x79, 0xbd, 0xe0, 0xdc, 0xf9, 0xb7, 0x67, 0x91, 0xa1, 0x0c, 0x5a, 0x7a,
-	0xd3, 0xcb, 0xdf, 0x00, 0x00, 0x00, 0xff, 0xff, 0x7f, 0xe9, 0x13, 0xf5, 0xeb, 0x01, 0x00, 0x00,
+	// 337 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x92, 0x4f, 0x4f, 0xf2, 0x40,
+	0x18, 0xc4, 0x59, 0x78, 0x5f, 0x84, 0x47, 0x13, 0x93, 0x15, 0x11, 0x7b, 0xd8, 0x10, 0x4e, 0x44,
+	0x63, 0x9b, 0xc0, 0xc1, 0xc4, 0xc4, 0x0b, 0x17, 0x2f, 0xf6, 0x52, 0x3d, 0x99, 0x78, 0xa0, 0x65,
+	0x2d, 0x98, 0x65, 0x97, 0xec, 0xb6, 0x06, 0xbe, 0x85, 0x1f, 0xcb, 0x23, 0x47, 0x8e, 0x86, 0x7e,
+	0x11, 0x63, 0xe9, 0x9f, 0xad, 0x89, 0xa6, 0xdc, 0x76, 0xb2, 0xcf, 0xfc, 0x26, 0x99, 0x0c, 0xb4,
+	0x18, 0x1d, 0x4b, 0xee, 0x09, 0x35, 0x17, 0xca, 0x0a, 0x96, 0xe6, 0x42, 0x8a, 0x40, 0x60, 0xc2,
+	0x03, 0x6f, 0xfa, 0xea, 0x9a, 0xda, 0xa7, 0xfe, 0xee, 0xdd, 0x00, 0xd8, 0xca, 0x1f, 0x85, 0xab,
+	0x3b, 0xc1, 0x26, 0xb8, 0x05, 0xff, 0xdd, 0x70, 0x45, 0x65, 0x07, 0x75, 0x51, 0xbf, 0xe9, 0xec,
+	0x04, 0x6e, 0x43, 0x7d, 0x3c, 0x17, 0x21, 0x0f, 0x3a, 0xd5, 0x2e, 0xea, 0xff, 0x73, 0x12, 0xd5,
+	0x6b, 0x01, 0xce, 0xbd, 0x0e, 0x55, 0x0b, 0xc1, 0x15, 0xed, 0xdd, 0xc2, 0xa1, 0xad, 0xfc, 0x07,
+	0xca, 0x58, 0x8c, 0x6c, 0x43, 0x5d, 0x51, 0xc6, 0x32, 0x66, 0xa2, 0x7e, 0x85, 0x9e, 0xc2, 0x89,
+	0x66, 0xcf, 0xa8, 0xcf, 0x70, 0x6c, 0x2b, 0xff, 0x51, 0x8e, 0xb9, 0x7a, 0xa1, 0x32, 0x27, 0xf3,
+	0x89, 0x4e, 0xfe, 0x56, 0xd8, 0x80, 0x86, 0xa4, 0x1e, 0x9d, 0xbd, 0x51, 0x19, 0xb3, 0x9b, 0x4e,
+	0xa6, 0xb5, 0xd4, 0x5a, 0x21, 0xf5, 0x1c, 0xce, 0x7e, 0xe0, 0xd3, 0xe4, 0xc1, 0xa6, 0x0a, 0x35,
+	0x5b, 0xf9, 0x78, 0x06, 0x07, 0x69, 0x4d, 0x17, 0xe6, 0xdf, 0xad, 0x9a, 0x79, 0x2d, 0xc6, 0xa0,
+	0xfc, 0x6d, 0x1a, 0x89, 0x19, 0x34, 0xb2, 0xfe, 0x2e, 0x4b, 0xf8, 0xd3, 0x63, 0x63, 0xb8, 0xc7,
+	0x71, 0x96, 0xb6, 0x84, 0xa3, 0x42, 0xaf, 0x56, 0x09, 0x88, 0x6e, 0x30, 0xae, 0xf7, 0x34, 0xa4,
+	0xc9, 0xa3, 0xfb, 0x8f, 0x2d, 0x41, 0xeb, 0x2d, 0x41, 0x9f, 0x5b, 0x82, 0xde, 0x23, 0x52, 0x59,
+	0x47, 0xa4, 0xb2, 0x89, 0x48, 0xe5, 0x69, 0xe0, 0xcf, 0x82, 0x69, 0xe8, 0x9a, 0x9e, 0x98, 0x5b,
+	0x3b, 0xb8, 0x15, 0x03, 0xaf, 0x92, 0x7d, 0x2f, 0xad, 0xc2, 0xda, 0x57, 0x0b, 0xaa, 0xdc, 0x7a,
+	0xbc, 0xf8, 0xe1, 0x57, 0x00, 0x00, 0x00, 0xff, 0xff, 0xb1, 0x0c, 0x61, 0x90, 0x09, 0x03, 0x00,
+	0x00,
 }
 
-func (m *GoldPool) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+// Reference imports to suppress errors if they are not otherwise used.
+var _ context.Context
+var _ grpc.ClientConn
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion4
+
+// MsgClient is the client API for Msg service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type MsgClient interface {
+	BuyGold(ctx context.Context, in *MsgBuyGold, opts ...grpc.CallOption) (*MsgBuyGoldResponse, error)
+	SellGold(ctx context.Context, in *MsgSellGold, opts ...grpc.CallOption) (*MsgSellGoldResponse, error)
+	TransferGold(ctx context.Context, in *MsgTransferGold, opts ...grpc.CallOption) (*MsgTransferGoldResponse, error)
+}
+
+type msgClient struct {
+	cc grpc1.ClientConn
+}
+
+func NewMsgClient(cc grpc1.ClientConn) MsgClient {
+	return &msgClient{cc}
+}
+
+func (c *msgClient) BuyGold(ctx context.Context, in *MsgBuyGold, opts ...grpc.CallOption) (*MsgBuyGoldResponse, error) {
+	out := new(MsgBuyGoldResponse)
+	err := c.cc.Invoke(ctx, "/ntchjb.learncosmos.learncosmos.Msg/BuyGold", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	return dAtA[:n], nil
+	return out, nil
 }
 
-func (m *GoldPool) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *GoldPool) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.PricePerUnit != 0 {
-		i = encodeVarintTx(dAtA, i, uint64(m.PricePerUnit))
-		i--
-		dAtA[i] = 0x18
-	}
-	if m.Amount != 0 {
-		i = encodeVarintTx(dAtA, i, uint64(m.Amount))
-		i--
-		dAtA[i] = 0x8
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *OwnedGold) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+func (c *msgClient) SellGold(ctx context.Context, in *MsgSellGold, opts ...grpc.CallOption) (*MsgSellGoldResponse, error) {
+	out := new(MsgSellGoldResponse)
+	err := c.cc.Invoke(ctx, "/ntchjb.learncosmos.learncosmos.Msg/SellGold", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	return dAtA[:n], nil
+	return out, nil
 }
 
-func (m *OwnedGold) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
+func (c *msgClient) TransferGold(ctx context.Context, in *MsgTransferGold, opts ...grpc.CallOption) (*MsgTransferGoldResponse, error) {
+	out := new(MsgTransferGoldResponse)
+	err := c.cc.Invoke(ctx, "/ntchjb.learncosmos.learncosmos.Msg/TransferGold", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
-func (m *OwnedGold) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.Amount != 0 {
-		i = encodeVarintTx(dAtA, i, uint64(m.Amount))
-		i--
-		dAtA[i] = 0x10
+// MsgServer is the server API for Msg service.
+type MsgServer interface {
+	BuyGold(context.Context, *MsgBuyGold) (*MsgBuyGoldResponse, error)
+	SellGold(context.Context, *MsgSellGold) (*MsgSellGoldResponse, error)
+	TransferGold(context.Context, *MsgTransferGold) (*MsgTransferGoldResponse, error)
+}
+
+// UnimplementedMsgServer can be embedded to have forward compatible implementations.
+type UnimplementedMsgServer struct {
+}
+
+func (*UnimplementedMsgServer) BuyGold(ctx context.Context, req *MsgBuyGold) (*MsgBuyGoldResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BuyGold not implemented")
+}
+func (*UnimplementedMsgServer) SellGold(ctx context.Context, req *MsgSellGold) (*MsgSellGoldResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SellGold not implemented")
+}
+func (*UnimplementedMsgServer) TransferGold(ctx context.Context, req *MsgTransferGold) (*MsgTransferGoldResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TransferGold not implemented")
+}
+
+func RegisterMsgServer(s grpc1.Server, srv MsgServer) {
+	s.RegisterService(&_Msg_serviceDesc, srv)
+}
+
+func _Msg_BuyGold_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgBuyGold)
+	if err := dec(in); err != nil {
+		return nil, err
 	}
-	if len(m.Owner) > 0 {
-		i -= len(m.Owner)
-		copy(dAtA[i:], m.Owner)
-		i = encodeVarintTx(dAtA, i, uint64(len(m.Owner)))
-		i--
-		dAtA[i] = 0xa
+	if interceptor == nil {
+		return srv.(MsgServer).BuyGold(ctx, in)
 	}
-	return len(dAtA) - i, nil
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ntchjb.learncosmos.learncosmos.Msg/BuyGold",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).BuyGold(ctx, req.(*MsgBuyGold))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_SellGold_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgSellGold)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).SellGold(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ntchjb.learncosmos.learncosmos.Msg/SellGold",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).SellGold(ctx, req.(*MsgSellGold))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Msg_TransferGold_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgTransferGold)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).TransferGold(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/ntchjb.learncosmos.learncosmos.Msg/TransferGold",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).TransferGold(ctx, req.(*MsgTransferGold))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _Msg_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "ntchjb.learncosmos.learncosmos.Msg",
+	HandlerType: (*MsgServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "BuyGold",
+			Handler:    _Msg_BuyGold_Handler,
+		},
+		{
+			MethodName: "SellGold",
+			Handler:    _Msg_SellGold_Handler,
+		},
+		{
+			MethodName: "TransferGold",
+			Handler:    _Msg_TransferGold_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "learncosmos/tx.proto",
 }
 
 func (m *MsgBuyGold) Marshal() (dAtA []byte, err error) {
@@ -426,6 +523,29 @@ func (m *MsgBuyGold) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *MsgBuyGoldResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgBuyGoldResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgBuyGoldResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
 func (m *MsgSellGold) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
@@ -458,6 +578,29 @@ func (m *MsgSellGold) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0xa
 	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MsgSellGoldResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgSellGoldResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgSellGoldResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
 	return len(dAtA) - i, nil
 }
 
@@ -503,6 +646,29 @@ func (m *MsgTransferGold) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *MsgTransferGoldResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MsgTransferGoldResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MsgTransferGoldResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintTx(dAtA []byte, offset int, v uint64) int {
 	offset -= sovTx(v)
 	base := offset
@@ -514,37 +680,6 @@ func encodeVarintTx(dAtA []byte, offset int, v uint64) int {
 	dAtA[offset] = uint8(v)
 	return base
 }
-func (m *GoldPool) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Amount != 0 {
-		n += 1 + sovTx(uint64(m.Amount))
-	}
-	if m.PricePerUnit != 0 {
-		n += 1 + sovTx(uint64(m.PricePerUnit))
-	}
-	return n
-}
-
-func (m *OwnedGold) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	l = len(m.Owner)
-	if l > 0 {
-		n += 1 + l + sovTx(uint64(l))
-	}
-	if m.Amount != 0 {
-		n += 1 + sovTx(uint64(m.Amount))
-	}
-	return n
-}
-
 func (m *MsgBuyGold) Size() (n int) {
 	if m == nil {
 		return 0
@@ -561,6 +696,15 @@ func (m *MsgBuyGold) Size() (n int) {
 	return n
 }
 
+func (m *MsgBuyGoldResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
 func (m *MsgSellGold) Size() (n int) {
 	if m == nil {
 		return 0
@@ -574,6 +718,15 @@ func (m *MsgSellGold) Size() (n int) {
 	if m.Amount != 0 {
 		n += 1 + sovTx(uint64(m.Amount))
 	}
+	return n
+}
+
+func (m *MsgSellGoldResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
 	return n
 }
 
@@ -597,200 +750,20 @@ func (m *MsgTransferGold) Size() (n int) {
 	return n
 }
 
+func (m *MsgTransferGoldResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	return n
+}
+
 func sovTx(x uint64) (n int) {
 	return (math_bits.Len64(x|1) + 6) / 7
 }
 func sozTx(x uint64) (n int) {
 	return sovTx(uint64((x << 1) ^ uint64((int64(x) >> 63))))
-}
-func (m *GoldPool) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowTx
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: GoldPool: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: GoldPool: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Amount", wireType)
-			}
-			m.Amount = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Amount |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 3:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field PricePerUnit", wireType)
-			}
-			m.PricePerUnit = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.PricePerUnit |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		default:
-			iNdEx = preIndex
-			skippy, err := skipTx(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthTx
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *OwnedGold) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowTx
-			}
-			if iNdEx >= l {
-				return io.ErrUnexpectedEOF
-			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: OwnedGold: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: OwnedGold: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Owner", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthTx
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthTx
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.Owner = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 2:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Amount", wireType)
-			}
-			m.Amount = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowTx
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Amount |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		default:
-			iNdEx = preIndex
-			skippy, err := skipTx(dAtA[iNdEx:])
-			if err != nil {
-				return err
-			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
-				return ErrInvalidLengthTx
-			}
-			if (iNdEx + skippy) > l {
-				return io.ErrUnexpectedEOF
-			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
 }
 func (m *MsgBuyGold) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
@@ -893,6 +866,56 @@ func (m *MsgBuyGold) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
+func (m *MsgBuyGoldResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgBuyGoldResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgBuyGoldResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
 func (m *MsgSellGold) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
@@ -973,6 +996,56 @@ func (m *MsgSellGold) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgSellGoldResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgSellGoldResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgSellGoldResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTx(dAtA[iNdEx:])
@@ -1106,6 +1179,56 @@ func (m *MsgTransferGold) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTx(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTx
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MsgTransferGoldResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTx
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MsgTransferGoldResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MsgTransferGoldResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
 		default:
 			iNdEx = preIndex
 			skippy, err := skipTx(dAtA[iNdEx:])

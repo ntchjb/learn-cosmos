@@ -1,0 +1,14 @@
+syntax = "proto3";
+package ntchjb.learncosmos.learncosmos;
+
+option go_package = "github.com/ntchjb/learn-cosmos/x/learncosmos/types";
+
+message GoldPool {
+  uint64 amount = 1;
+  uint64 price_per_unit = 3;
+}
+
+message OwnedGold {
+  string owner = 1;
+  uint64 amount = 2;
+}
