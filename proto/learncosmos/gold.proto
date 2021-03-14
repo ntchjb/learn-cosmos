@@ -5,10 +5,20 @@ option go_package = "github.com/ntchjb/learn-cosmos/x/learncosmos/types";
 
 message GoldPool {
   uint64 amount = 1;
-  uint64 price_per_unit = 3;
 }
 
 message OwnedGold {
   string owner = 1;
   uint64 amount = 2;
+}
+
+message PoolOrder {
+  enum OrderType {
+    BUY = 0;
+    SELL = 1;
+  }
+  OrderType type = 1;
+  string user_addr = 2;
+  uint64 price_per_unit = 3;
+  uint64 amount = 4;
 }

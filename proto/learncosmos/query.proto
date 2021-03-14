@@ -23,7 +23,7 @@ message QueryGoldPoolRequest {}
 // this line is used by starport scaffolding # 3
 message QueryGoldPoolResponse {
     uint64 gold_amount = 1;
-    uint64 gold_price_per_unit = 2;
+    uint64 latest_price = 2;
 }
 
 message QueryOwnedGoldRequest {

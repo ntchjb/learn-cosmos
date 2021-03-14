@@ -330,8 +330,13 @@ func New(
 	// If evidence needs to be handled for the app, set routes in router here and seal
 	app.EvidenceKeeper = *evidenceKeeper
 
+	scopedLearnCosmosKeeper := app.CapabilityKeeper.ScopeToModule(learncosmostypes.ModuleName)
 	app.learncosmosKeeper = *learncosmoskeeper.NewKeeper(
-		appCodec, keys[learncosmostypes.StoreKey], keys[learncosmostypes.MemStoreKey], app.BankKeeper,
+		appCodec,
+		keys[learncosmostypes.StoreKey], keys[learncosmostypes.MemStoreKey],
+		app.BankKeeper,
+		app.IBCKeeper.ChannelKeeper,
+		scopedLearnCosmosKeeper,
 	)
 
 	// this line is used by starport scaffolding # stargate/app/keeperDefinition
