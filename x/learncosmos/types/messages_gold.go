@@ -7,10 +7,12 @@ import (
 
 var _ sdk.Msg = &MsgBuyGold{}
 
-func NewMsgBuyGold(buyer string, amount uint64) *MsgBuyGold {
+func NewMsgBuyGold(buyer string, amount uint64, ibcChannel string, oracleScriptID int64) *MsgBuyGold {
 	return &MsgBuyGold{
-		Buyer:  buyer,
-		Amount: amount,
+		Buyer:          buyer,
+		Amount:         amount,
+		IbcChannel:     ibcChannel,
+		OracleScriptId: oracleScriptID,
 	}
 }
 
@@ -46,10 +48,12 @@ func (msg *MsgBuyGold) ValidateBasic() error {
 
 var _ sdk.Msg = &MsgSellGold{}
 
-func NewMsgSellGold(seller string, amount uint64) *MsgSellGold {
+func NewMsgSellGold(seller string, amount uint64, ibcChannel string, oracleScriptID int64) *MsgSellGold {
 	return &MsgSellGold{
-		Seller: seller,
-		Amount: amount,
+		Seller:         seller,
+		Amount:         amount,
+		IbcChannel:     ibcChannel,
+		OracleScriptId: oracleScriptID,
 	}
 }
 

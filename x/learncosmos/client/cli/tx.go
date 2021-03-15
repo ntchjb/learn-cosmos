@@ -34,6 +34,9 @@ func GetTxCmd() *cobra.Command {
 }
 
 func CmdBuyGold() *cobra.Command {
+	var ibcChannel string
+	var oracleScriptID int64
+
 	cmd := &cobra.Command{
 		Use:   "buy-gold [gold_amount]",
 		Short: "Buy gold from pool",
@@ -50,7 +53,7 @@ func CmdBuyGold() *cobra.Command {
 				return err
 			}
 
-			msg := types.NewMsgBuyGold(clientCtx.GetFromAddress().String(), goldAmount)
+			msg := types.NewMsgBuyGold(clientCtx.GetFromAddress().String(), goldAmount, ibcChannel, oracleScriptID)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}
@@ -58,12 +61,18 @@ func CmdBuyGold() *cobra.Command {
 		},
 	}
 
+	cmd.Flags().StringVarP(&ibcChannel, "channel", "", types.DefaultGoldPriceIBCChannel, "Name of IBC channel to be used to request price from oracle")
+	cmd.Flags().Int64VarP(&oracleScriptID, "oracle-id", "", 1, "ID of oracle script used for querying gold price")
+
 	flags.AddTxFlagsToCmd(cmd)
 
 	return cmd
 }
 
 func CmdSellGold() *cobra.Command {
+	var ibcChannel string
+	var oracleScriptID int64
+
 	cmd := &cobra.Command{
 		Use:   "sell-gold [gold_amount]",
 		Short: "sell gold to pool",
@@ -80,13 +89,16 @@ func CmdSellGold() *cobra.Command {
 				return err
 			}
 
-			msg := types.NewMsgSellGold(clientCtx.GetFromAddress().String(), goldAmount)
+			msg := types.NewMsgSellGold(clientCtx.GetFromAddress().String(), goldAmount, ibcChannel, oracleScriptID)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}
 			return tx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
 		},
 	}
+
+	cmd.Flags().StringVarP(&ibcChannel, "channel", "", types.DefaultGoldPriceIBCChannel, "Name of IBC channel to be used to request price from oracle")
+	cmd.Flags().Int64VarP(&oracleScriptID, "oracle-id", "", 1, "ID of oracle script used for querying gold price")
 
 	flags.AddTxFlagsToCmd(cmd)
 

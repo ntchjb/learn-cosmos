@@ -1,7 +1,10 @@
 package keeper
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/bandprotocol/chain/pkg/obi"
@@ -30,8 +33,12 @@ type (
 		scopedKeeper  capabilitykeeper.ScopedKeeper
 	}
 
-	GoldPriceOBI struct {
+	GoldPriceOBIInput struct {
 		Multiplier uint64
+	}
+
+	GoldPriceOBIOutput struct {
+		Price uint64
 	}
 )
 
@@ -101,31 +108,43 @@ func (k Keeper) SetOwnedGold(ctx sdk.Context, ownedGold types.OwnedGold) {
 	store.Set(key, value)
 }
 
-func (k Keeper) BuyGoldFromPool(ctx sdk.Context, msg types.MsgBuyGold) error {
+func (k Keeper) BuyGoldFromPool(ctx sdk.Context, order types.PoolOrder) error {
 	goldPool := k.GetGoldPool(ctx)
-	ownedGold := k.GetOwnedGold(ctx, msg.Buyer)
+	ownedGold := k.GetOwnedGold(ctx, order.UserAddr)
 
-	if msg.Amount > goldPool.Amount {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidRequest, "gold amount in pool is not sufficient")
+	if order.Amount > goldPool.Amount {
+		err := sdkerrors.Wrapf(sdkerrors.ErrInvalidRequest, "gold amount in pool is not sufficient")
+		order.Status = types.OrderStatus_SUCCESS
+		order.StatusReason = err.Error()
+		k.SetOrder(ctx, order)
+		return err
 	}
 
-	buyerAddr, err := sdk.AccAddressFromBech32(msg.Buyer)
+	buyerAddr, err := sdk.AccAddressFromBech32(order.UserAddr)
 	if err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "buyer address is invalid")
+		err := sdkerrors.Wrapf(sdkerrors.ErrInvalidAddress, "buyer address is invalid: %w", err)
+		order.Status = types.OrderStatus_FAILED
+		order.StatusReason = err.Error()
+		k.SetOrder(ctx, order)
+		return err
 	}
 
 	currentBalance := k.bankKeeper.GetBalance(ctx, buyerAddr, "uusd")
 	fmt.Println("current balance is", currentBalance)
 
-	payAmount := msg.Amount * goldPool.PricePerUnit
+	payAmount := order.Amount * order.PricePerUnit
 	if currentBalance.Amount.Uint64() < payAmount {
-		return sdkerrors.Wrapf(sdkerrors.ErrInsufficientFunds, "current buyer balance is not sufficient")
+		err := sdkerrors.Wrapf(sdkerrors.ErrInsufficientFunds, "current buyer balance is not sufficient")
+		order.Status = types.OrderStatus_FAILED
+		order.StatusReason = err.Error()
+		k.SetOrder(ctx, order)
+		return err
 	}
 
-	goldPool.Amount -= msg.Amount
+	goldPool.Amount -= order.Amount
 	k.SetGoldPool(ctx, goldPool)
 
-	ownedGold.Amount += msg.Amount
+	ownedGold.Amount += order.Amount
 	k.SetOwnedGold(ctx, ownedGold)
 
 	if err := k.bankKeeper.SendCoinsFromAccountToModule(
@@ -134,35 +153,50 @@ func (k Keeper) BuyGoldFromPool(ctx sdk.Context, msg types.MsgBuyGold) error {
 		types.ModuleName,
 		sdk.NewCoins(sdk.NewCoin("uusd", sdk.NewIntFromUint64(payAmount))),
 	); err != nil {
+		order.Status = types.OrderStatus_FAILED
+		order.StatusReason = err.Error()
+		k.SetOrder(ctx, order)
 		return err
 	}
 
+	order.Status = types.OrderStatus_SUCCESS
+	k.SetOrder(ctx, order)
 	return nil
 }
 
-func (k Keeper) SellGoldToPool(ctx sdk.Context, msg types.MsgSellGold) error {
+func (k Keeper) SellGoldToPool(ctx sdk.Context, order types.PoolOrder) error {
 	goldPool := k.GetGoldPool(ctx)
-	ownedGold := k.GetOwnedGold(ctx, msg.Seller)
+	ownedGold := k.GetOwnedGold(ctx, order.UserAddr)
 
-	sellerAddr, _ := sdk.AccAddressFromBech32(msg.Seller)
+	sellerAddr, _ := sdk.AccAddressFromBech32(order.UserAddr)
 
-	if msg.Amount > ownedGold.Amount {
-		return sdkerrors.Wrapf(sdkerrors.ErrInvalidRequest, "gold amount owned by sender is not sufficient")
+	if order.Amount > ownedGold.Amount {
+		err := sdkerrors.Wrapf(sdkerrors.ErrInvalidRequest, "gold amount owned by sender is not sufficient")
+		order.Status = types.OrderStatus_FAILED
+		order.StatusReason = err.Error()
+		k.SetOrder(ctx, order)
+		return err
 	}
 
-	goldPool.Amount += msg.Amount
+	goldPool.Amount += order.Amount
 	k.SetGoldPool(ctx, goldPool)
-	ownedGold.Amount -= msg.Amount
+	ownedGold.Amount -= order.Amount
 	k.SetOwnedGold(ctx, ownedGold)
 
 	if err := k.bankKeeper.SendCoinsFromModuleToAccount(
 		ctx,
 		types.ModuleName,
 		sellerAddr,
-		sdk.NewCoins(sdk.NewCoin("uusd", sdk.NewIntFromUint64(goldPool.PricePerUnit*msg.Amount))),
+		sdk.NewCoins(sdk.NewCoin("uusd", sdk.NewIntFromUint64(order.PricePerUnit*order.Amount))),
 	); err != nil {
+		order.Status = types.OrderStatus_FAILED
+		order.StatusReason = err.Error()
+		k.SetOrder(ctx, order)
 		return err
 	}
+
+	order.Status = types.OrderStatus_SUCCESS
+	k.SetOrder(ctx, order)
 
 	return nil
 }
@@ -183,7 +217,54 @@ func (k Keeper) TransferGold(ctx sdk.Context, msg types.MsgTransferGold) error {
 	return nil
 }
 
-func (k Keeper) RequestGoldPrice(ctx sdk.Context, ibcChannelID string, orderID string) error {
+func (k Keeper) SetOrder(ctx sdk.Context, poolOrder types.PoolOrder) {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.OrderKey))
+
+	key := types.KeyPrefix(types.OrderKey + poolOrder.Id)
+	value := k.cdc.MustMarshalBinaryBare(&poolOrder)
+
+	store.Set(key, value)
+}
+
+func (k Keeper) GetOrder(ctx sdk.Context, orderID string) types.PoolOrder {
+	store := prefix.NewStore(ctx.KVStore(k.storeKey), types.KeyPrefix(types.OrderKey))
+
+	key := types.KeyPrefix(types.OrderKey + orderID)
+	var order types.PoolOrder
+	k.cdc.MustUnmarshalBinaryBare(store.Get(key), &order)
+
+	return order
+}
+
+func (k Keeper) CreatePendingOrder(ctx sdk.Context, orderType types.OrderType, amount uint64, user sdk.AccAddress) string {
+	transactionHash := sha256.Sum256(ctx.TxBytes())
+	order := types.PoolOrder{
+		Id:       hex.EncodeToString(transactionHash[:]),
+		Type:     orderType,
+		UserAddr: user.String(),
+		Amount:   amount,
+		Status:   types.OrderStatus_PENDING,
+	}
+
+	k.SetOrder(ctx, order)
+
+	return order.Id
+}
+
+func (k Keeper) ProcessOrder(ctx sdk.Context, orderID string, goldPricePerUnit uint64) error {
+	order := k.GetOrder(ctx, orderID)
+	order.PricePerUnit = goldPricePerUnit
+	switch order.Type {
+	case types.OrderType_BUY:
+		return k.BuyGoldFromPool(ctx, order)
+	case types.OrderType_SELL:
+		return k.SellGoldToPool(ctx, order)
+	}
+
+	return nil
+}
+
+func (k Keeper) RequestGoldPrice(ctx sdk.Context, ibcChannelID, orderID string, oracleScriptID int64) error {
 	sourcePort := types.ModuleName
 	sourceChannel := ibcChannelID
 	sourceChannelEnd, found := k.channelKeeper.GetChannel(ctx, sourcePort, sourceChannel)
@@ -206,16 +287,16 @@ func (k Keeper) RequestGoldPrice(ctx sdk.Context, ibcChannelID string, orderID s
 			sourceChannel, sourcePort,
 		)
 	}
-	clientID := fmt.Sprintf("Order:%v", orderID)
-	oracleScriptID := oracle.OracleScriptID(33)
-	callData := obi.MustEncode(GoldPriceOBI{
+	clientID := strings.Join([]string{"order", orderID}, ":")
+	oracleScript := oracle.OracleScriptID(oracleScriptID)
+	callData := obi.MustEncode(GoldPriceOBIInput{
 		Multiplier: 100,
 	})
 	askCount := uint64(4)
 	minCount := uint64(3)
 
 	packet := oracle.NewOracleRequestPacketData(
-		clientID, oracleScriptID, callData,
+		clientID, oracleScript, callData,
 		askCount, minCount,
 	)
 

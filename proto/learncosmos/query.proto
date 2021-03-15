@@ -2,6 +2,7 @@ syntax = "proto3";
 package ntchjb.learncosmos.learncosmos;
 
 import "google/api/annotations.proto";
+import "learncosmos/gold.proto";
 // this line is used by starport scaffolding # 1
 
 option go_package = "github.com/ntchjb/learn-cosmos/x/learncosmos/types";
@@ -16,6 +17,10 @@ service Query {
     rpc OwnedGold(QueryOwnedGoldRequest) returns (QueryOwnedGoldResponse) {
         option (google.api.http).get = "/query/owned-gold/{owner}";
     }
+
+    rpc Order(QueryPoolOrderRequest) returns (QueryPoolOrderResponse) {
+        option (google.api.http).get = "/query/orders/{id}";
+    }
 }
 
 message QueryGoldPoolRequest {}
@@ -23,7 +28,6 @@ message QueryGoldPoolRequest {}
 // this line is used by starport scaffolding # 3
 message QueryGoldPoolResponse {
     uint64 gold_amount = 1;
-    uint64 latest_price = 2;
 }
 
 message QueryOwnedGoldRequest {
@@ -32,4 +36,18 @@ message QueryOwnedGoldRequest {
 
 message QueryOwnedGoldResponse {
     uint64 amount = 1;
+}
+
+message QueryPoolOrderRequest {
+    string id = 1;
+}
+
+message QueryPoolOrderResponse {
+    string id = 1;
+    OrderType type = 2;
+    string user_addr = 3;
+    uint64 price_per_unit = 4;
+    uint64 amount = 5;
+    OrderStatus status = 6;
+    string status_reason = 7;
 }

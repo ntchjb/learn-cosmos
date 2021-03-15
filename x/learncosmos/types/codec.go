@@ -5,6 +5,7 @@ import (
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/msgservice"
+	channeltypes "github.com/cosmos/cosmos-sdk/x/ibc/core/04-channel/types"
 	// this line is used by starport scaffolding # 1
 )
 
@@ -13,6 +14,7 @@ func RegisterCodec(cdc *codec.LegacyAmino) {
 	cdc.RegisterConcrete(&MsgBuyGold{}, "learncosmos/BuyGold", nil)
 	cdc.RegisterConcrete(&MsgSellGold{}, "learncosmos/SellGold", nil)
 	cdc.RegisterConcrete(&MsgTransferGold{}, "learncosmos/TransferGold", nil)
+	cdc.RegisterConcrete(&channeltypes.MsgRecvPacket{}, "ibc/core/v1/MsgRecvPacket", nil)
 }
 
 func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
@@ -21,6 +23,7 @@ func RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 		&MsgBuyGold{},
 		&MsgSellGold{},
 		&MsgTransferGold{},
+		&channeltypes.MsgRecvPacket{},
 	)
 
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)

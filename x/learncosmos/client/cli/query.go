@@ -31,6 +31,7 @@ func GetQueryCmd(queryRoute string) *cobra.Command {
 	// this line is used by starport scaffolding # 1
 	cmd.AddCommand(CmdGetGoldPool())
 	cmd.AddCommand(CmdGetOwnedGold())
+	cmd.AddCommand(CmdGetOrder())
 
 	return cmd
 }
@@ -79,6 +80,36 @@ func CmdGetOwnedGold() *cobra.Command {
 				Owner: args[0],
 			}
 			res, err := queryClient.OwnedGold(context.Background(), request)
+			if err != nil {
+				return err
+			}
+
+			return clientCtx.PrintProto(res)
+		},
+	}
+
+	flags.AddQueryFlagsToCmd(cmd)
+
+	return cmd
+}
+
+func CmdGetOrder() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   types.QueryOrder + " [order_id]",
+		Short: "Get order information",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			clientCtx, err := client.GetClientQueryContext(cmd)
+			if err != nil {
+				return err
+			}
+
+			queryClient := types.NewQueryClient(clientCtx)
+
+			request := &types.QueryPoolOrderRequest{
+				Id: args[0],
+			}
+			res, err := queryClient.Order(context.Background(), request)
 			if err != nil {
 				return err
 			}

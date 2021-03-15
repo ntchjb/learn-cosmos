@@ -20,6 +20,10 @@ const (
 	GoldPoolKey = "Gold-pool-"
 
 	OwnedGoldKey = "Gold-owned-"
+
+	OrderKey = "order-"
+
+	DefaultGoldPriceIBCChannel = "gold-price-oracle"
 )
 
 func KeyPrefix(p string) []byte {

@@ -5,6 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	channeltypes "github.com/cosmos/cosmos-sdk/x/ibc/core/04-channel/types"
 	"github.com/ntchjb/learn-cosmos/x/learncosmos/keeper"
 	"github.com/ntchjb/learn-cosmos/x/learncosmos/types"
 )
@@ -30,6 +31,9 @@ func NewHandler(k keeper.Keeper) sdk.Handler {
 			res, err := msgServer.TransferGold(sdk.WrapSDKContext(ctx), msg)
 			return sdk.WrapServiceResult(ctx, res, err)
 
+		case *channeltypes.MsgRecvPacket:
+			res, err := msgServer.ProcessIBCPacket(sdk.WrapSDKContext(ctx), msg)
+			return sdk.WrapServiceResult(ctx, res, err)
 		default:
 			errMsg := fmt.Sprintf("unrecognized %s message type: %T", types.ModuleName, msg)
 			return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, errMsg)
