@@ -1,6 +1,6 @@
 accounts:
   - name: alice
-    coins: ["1000000000uusd", "1000000stake"]
+    coins: ["1000000000000000uusd", "1000000stake"]
   - name: bob
     coins: ["1000000uusd"]
 validator:
@@ -11,7 +11,6 @@ genesis:
   app_state:
     learncosmos:
       gold_amount: "1000000"
-      gold_unit_price_uusd: "1000"
 servers:
   api-address: "localhost:1317"
   rpc-address: "localhost:26657"

@@ -20,6 +20,16 @@ const (
 	GoldPoolKey = "Gold-pool-"
 
 	OwnedGoldKey = "Gold-owned-"
+
+	OrderKey = "order-"
+
+	DefaultGoldPriceIBCChannel = "gold-price-oracle"
+
+	// PortKey
+	PortKey = ModuleName
+
+	// Version
+	Version = "ics20-1"
 )
 
 func KeyPrefix(p string) []byte {

@@ -1,6 +1,8 @@
 syntax = "proto3";
 package ntchjb.learncosmos.learncosmos;
 
+import "ibc/core/channel/v1/tx.proto";
+
 option go_package = "github.com/ntchjb/learn-cosmos/x/learncosmos/types";
 
 service Msg {
@@ -14,6 +16,8 @@ service Msg {
 message MsgBuyGold {
   string buyer = 1;
   uint64 amount = 2;
+  string ibc_channel = 3;
+  int64 oracle_script_id = 4;
 }
 
 message MsgBuyGoldResponse {}
@@ -21,6 +25,8 @@ message MsgBuyGoldResponse {}
 message MsgSellGold {
   string seller = 1;
   uint64 amount = 2;
+  string ibc_channel = 3;
+  int64 oracle_script_id = 4;
 }
 
 message MsgSellGoldResponse {}

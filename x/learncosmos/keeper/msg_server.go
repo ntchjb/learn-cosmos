@@ -4,6 +4,7 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ntchjb/learn-cosmos/x/learncosmos/types"
 )
 
@@ -20,7 +21,12 @@ var _ types.MsgServer = msgServer{}
 func (k msgServer) BuyGold(goCtx context.Context, msg *types.MsgBuyGold) (*types.MsgBuyGoldResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	if err := k.BuyGoldFromPool(ctx, *msg); err != nil {
+	buyerAddr, err := sdk.AccAddressFromBech32(msg.Buyer)
+	if err != nil {
+		return nil, sdkerrors.Wrapf(sdkerrors.ErrInvalidRequest, "invalid buyer address: %w", err)
+	}
+	orderID := k.CreatePendingOrder(ctx, types.OrderType_BUY, msg.Amount, buyerAddr)
+	if err := k.RequestGoldPrice(ctx, msg.IbcChannel, orderID, msg.OracleScriptId); err != nil {
 		return nil, err
 	}
 
@@ -30,7 +36,12 @@ func (k msgServer) BuyGold(goCtx context.Context, msg *types.MsgBuyGold) (*types
 func (k msgServer) SellGold(goCtx context.Context, msg *types.MsgSellGold) (*types.MsgSellGoldResponse, error) {
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	if err := k.SellGoldToPool(ctx, *msg); err != nil {
+	sellerAddr, err := sdk.AccAddressFromBech32(msg.Seller)
+	if err != nil {
+		return nil, sdkerrors.Wrapf(sdkerrors.ErrInvalidRequest, "invalid seller address: %w", err)
+	}
+	orderID := k.CreatePendingOrder(ctx, types.OrderType_SELL, msg.Amount, sellerAddr)
+	if err := k.RequestGoldPrice(ctx, msg.IbcChannel, orderID, msg.OracleScriptId); err != nil {
 		return nil, err
 	}
 

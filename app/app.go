@@ -318,9 +318,21 @@ func New(
 	)
 	transferModule := transfer.NewAppModule(app.TransferKeeper)
 
+	scopedLearnCosmosKeeper := app.CapabilityKeeper.ScopeToModule(learncosmostypes.ModuleName)
+	app.learncosmosKeeper = *learncosmoskeeper.NewKeeper(
+		appCodec,
+		keys[learncosmostypes.StoreKey], keys[learncosmostypes.MemStoreKey],
+		app.BankKeeper,
+		app.IBCKeeper.ChannelKeeper,
+		&app.IBCKeeper.PortKeeper,
+		scopedLearnCosmosKeeper,
+	)
+	learncosmosModule := learncosmos.NewAppModule(appCodec, app.learncosmosKeeper)
+
 	// Create static IBC router, add transfer route, then set and seal it
 	ibcRouter := porttypes.NewRouter()
 	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferModule)
+	ibcRouter.AddRoute(learncosmostypes.ModuleName, learncosmosModule)
 	app.IBCKeeper.SetRouter(ibcRouter)
 
 	// Create evidence Keeper for to register the IBC light client misbehaviour evidence route
@@ -329,10 +341,6 @@ func New(
 	)
 	// If evidence needs to be handled for the app, set routes in router here and seal
 	app.EvidenceKeeper = *evidenceKeeper
-
-	app.learncosmosKeeper = *learncosmoskeeper.NewKeeper(
-		appCodec, keys[learncosmostypes.StoreKey], keys[learncosmostypes.MemStoreKey], app.BankKeeper,
-	)
 
 	// this line is used by starport scaffolding # stargate/app/keeperDefinition
 
@@ -370,7 +378,7 @@ func New(
 		ibc.NewAppModule(app.IBCKeeper),
 		params.NewAppModule(app.ParamsKeeper),
 		transferModule,
-		learncosmos.NewAppModule(appCodec, app.learncosmosKeeper),
+		learncosmosModule,
 		// this line is used by starport scaffolding # stargate/app/appModule
 	)
 

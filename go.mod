@@ -3,6 +3,7 @@ module github.com/ntchjb/learn-cosmos
 go 1.15
 
 require (
+	github.com/bandprotocol/chain v1.0.1-0.20210312113128-565dc4a0f4e6
 	github.com/cosmos/cosmos-sdk v0.41.0
 	github.com/gogo/protobuf v1.3.3
 	github.com/golang/protobuf v1.4.3
