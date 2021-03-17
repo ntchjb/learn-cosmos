@@ -2,13 +2,9 @@ package keeper
 
 import (
 	"context"
-	"strings"
 
-	"github.com/bandprotocol/chain/pkg/obi"
-	oracle "github.com/bandprotocol/chain/x/oracle/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	channeltypes "github.com/cosmos/cosmos-sdk/x/ibc/core/04-channel/types"
 	"github.com/ntchjb/learn-cosmos/x/learncosmos/types"
 )
 
@@ -60,29 +56,4 @@ func (k msgServer) TransferGold(goCtx context.Context, msg *types.MsgTransferGol
 	}
 
 	return &types.MsgTransferGoldResponse{}, nil
-}
-
-func (k msgServer) ProcessIBCPacket(goCtx context.Context, msg *channeltypes.MsgRecvPacket) (*channeltypes.MsgRecvPacketResponse, error) {
-	ctx := sdk.UnwrapSDKContext(goCtx)
-
-	// Unmarshal data in MsgRecvPacket
-	var oracleResult oracle.OracleResponsePacketData
-	if err := k.cdc.UnmarshalBinaryBare(msg.Packet.Data, &oracleResult); err != nil {
-		return nil, sdkerrors.Wrapf(sdkerrors.ErrInvalidRequest, "unable to unmarshal oracle result: %w", err)
-	}
-
-	// Get order ID from client ID of the MsgRecvPacket
-	clientIDList := strings.Split(oracleResult.ClientID, ":")
-	if len(clientIDList) != 2 {
-		return nil, sdkerrors.Wrapf(sdkerrors.ErrInvalidRequest, "unable to get order ID from oracle's client ID")
-	}
-	orderID := strings.Split(oracleResult.ClientID, ":")[1]
-
-	var obiOutput GoldPriceOBIOutput
-	obi.MustDecode(oracleResult.Result, &obiOutput)
-	if err := k.ProcessOrder(ctx, orderID, obiOutput.Price); err != nil {
-		return nil, err
-	}
-
-	return &channeltypes.MsgRecvPacketResponse{}, nil
 }

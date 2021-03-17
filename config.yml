@@ -1,6 +1,6 @@
 accounts:
   - name: alice
-    coins: ["1000000000uusd", "1000000stake"]
+    coins: ["1000000000000000uusd", "1000000stake"]
   - name: bob
     coins: ["1000000uusd"]
 validator:

@@ -16,8 +16,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	capabilitykeeper "github.com/cosmos/cosmos-sdk/x/capability/keeper"
+	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
 	clienttypes "github.com/cosmos/cosmos-sdk/x/ibc/core/02-client/types"
-	ibcChannelKeeper "github.com/cosmos/cosmos-sdk/x/ibc/core/04-channel/keeper"
 	channeltypes "github.com/cosmos/cosmos-sdk/x/ibc/core/04-channel/types"
 	host "github.com/cosmos/cosmos-sdk/x/ibc/core/24-host"
 	"github.com/ntchjb/learn-cosmos/x/learncosmos/types"
@@ -29,23 +29,19 @@ type (
 		storeKey      sdk.StoreKey
 		memKey        sdk.StoreKey
 		bankKeeper    types.BankKeeper
-		channelKeeper ibcChannelKeeper.Keeper
+		channelKeeper types.ChannelKeeper
+		portKeeper    types.PortKeeper
 		scopedKeeper  capabilitykeeper.ScopedKeeper
 	}
-
-	GoldPriceOBIInput struct {
-		Multiplier uint64
-	}
-
-	GoldPriceOBIOutput struct {
-		Price uint64
-	}
 )
+
+const multiplier = 1000000
 
 func NewKeeper(cdc codec.Marshaler,
 	storeKey, memKey sdk.StoreKey,
 	bk types.BankKeeper,
-	chk ibcChannelKeeper.Keeper,
+	chk types.ChannelKeeper,
+	pk types.PortKeeper,
 	sck capabilitykeeper.ScopedKeeper,
 ) *Keeper {
 	return &Keeper{
@@ -54,8 +50,28 @@ func NewKeeper(cdc codec.Marshaler,
 		memKey:        memKey,
 		bankKeeper:    bk,
 		channelKeeper: chk,
+		portKeeper:    pk,
 		scopedKeeper:  sck,
 	}
+}
+
+// ClaimCapability allows the transfer module that can claim a capability that IBC module
+// passes to it
+func (k Keeper) ClaimCapability(ctx sdk.Context, cap *capabilitytypes.Capability, name string) error {
+	return k.scopedKeeper.ClaimCapability(ctx, cap, name)
+}
+
+// AuthenticateCapability wraps the scopedKeeper's AuthenticateCapability function
+func (k Keeper) AuthenticateCapability(ctx sdk.Context, cap *capabilitytypes.Capability, name string) bool {
+	return k.scopedKeeper.AuthenticateCapability(ctx, cap, name)
+}
+
+// BindPort defines a wrapper function for the ort Keeper's function in
+// order to expose it to module's InitGenesis function
+func (k Keeper) BindPort(ctx sdk.Context, portID string) error {
+	cap := k.portKeeper.BindPort(ctx, portID)
+
+	return k.ClaimCapability(ctx, cap, host.PortPath(portID))
 }
 
 func (k Keeper) Logger(ctx sdk.Context) log.Logger {
@@ -289,8 +305,8 @@ func (k Keeper) RequestGoldPrice(ctx sdk.Context, ibcChannelID, orderID string, 
 	}
 	clientID := strings.Join([]string{"order", orderID}, ":")
 	oracleScript := oracle.OracleScriptID(oracleScriptID)
-	callData := obi.MustEncode(GoldPriceOBIInput{
-		Multiplier: 100,
+	callData := obi.MustEncode(types.GoldPriceOBIInput{
+		Multiplier: multiplier,
 	})
 	askCount := uint64(4)
 	minCount := uint64(3)
@@ -312,8 +328,8 @@ func (k Keeper) RequestGoldPrice(ctx sdk.Context, ibcChannelID, orderID string, 
 		sourceChannel,
 		destinationPort,
 		destinationChannel,
-		clienttypes.NewHeight(0, 100),
-		uint64(1*time.Minute),
+		clienttypes.NewHeight(0, 0),
+		uint64(ctx.BlockTime().UnixNano()+int64(20*time.Minute)),
 	),
 	); err != nil {
 		return err

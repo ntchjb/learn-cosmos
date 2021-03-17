@@ -11,8 +11,6 @@ service Msg {
   rpc SellGold(MsgSellGold) returns (MsgSellGoldResponse);
 
   rpc TransferGold(MsgTransferGold) returns (MsgTransferGoldResponse);
-
-  rpc ProcessIBCPacket(ibc.core.channel.v1.MsgRecvPacket) returns (ibc.core.channel.v1.MsgRecvPacketResponse);
 }
 
 message MsgBuyGold {

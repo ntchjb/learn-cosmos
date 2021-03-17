@@ -13,6 +13,8 @@ func InitGenesis(ctx sdk.Context, k keeper.Keeper, genState types.GenesisState) 
 	k.SetGoldPool(ctx, types.GoldPool{
 		Amount: genState.GoldAmount,
 	})
+
+	k.BindPort(ctx, types.PortKey)
 }
 
 // ExportGenesis returns the capability module's exported genesis.
